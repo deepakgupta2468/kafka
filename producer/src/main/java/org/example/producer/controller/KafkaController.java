@@ -20,10 +20,7 @@ public class KafkaController {
 
     @PostMapping("/employees")
     public ResponseEntity<Void> sendEmployee(@Valid @RequestBody Employee employee) {
-        for (int i = 1001; i < 1010; i++) {
-            employee.setId((long)i);
             producerService.sendEmployee(employee);
-        }
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }
