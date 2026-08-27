@@ -3,9 +3,10 @@ package org.example.producer.config;
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.example.producer.model.Employee;
+import org.example.producer.model.EmployeeEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -21,7 +22,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Employee> producerFactory() {
+    public ProducerFactory<String, EmployeeEvent> producerFactory() {
         Map<String, Object> props = Map.of(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.bootstrapServers(),
                 ProducerConfig.ACKS_CONFIG, "all",
@@ -35,7 +36,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, Employee> kafkaTemplate() {
+    public KafkaTemplate<String, EmployeeEvent> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }

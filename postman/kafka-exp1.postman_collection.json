@@ -1,0 +1,59 @@
+{
+  "info": {
+    "name": "Kafka Employee Events",
+    "description": "Requests for the employee producer service. Create and delete requests publish Kafka events asynchronously.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "producerBaseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "employeeId",
+      "value": "101"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{producerBaseUrl}}/actuator/health"
+      }
+    },
+    {
+      "name": "Create employee event",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": {{employeeId}},\n  \"name\": \"Deepak Gupta\",\n  \"department\": \"Engineering\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{producerBaseUrl}}/employees"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete employee event",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{producerBaseUrl}}/employees/{{employeeId}}"
+      },
+      "response": []
+    }
+  ]
+}

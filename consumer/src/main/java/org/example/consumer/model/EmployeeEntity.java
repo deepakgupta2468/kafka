@@ -30,4 +30,8 @@ public class EmployeeEntity {
     public static EmployeeEntity from(Employee employee) {
         return new EmployeeEntity(employee.getId(), employee.getName(), employee.getDepartment());
     }
+
+    public static EmployeeEntity from(EmployeeEvent event) {
+        return new EmployeeEntity(event.employeeId(), event.name(), event.department());
+    }
 }

@@ -1,8 +1,9 @@
 package org.example.consumer.service;
 
 import org.example.consumer.config.KafkaConsumerProperties;
-import org.example.consumer.model.Employee;
+import org.example.consumer.model.EmployeeEvent;
 import org.example.consumer.model.EmployeeEntity;
+import org.example.consumer.model.EmployeeEventType;
 import org.example.consumer.repository.EmployeeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +29,22 @@ public class KafkaConsumerService {
             concurrency = "${app.kafka.concurrency}"
     )
     @Transactional
-    public void consume(Employee employee) {
-        employeeRepository.save(EmployeeEntity.from(employee));
-        LOGGER.info("Persisted employee event: employeeId={}, name={}, department={}, consumerGroup={}",
-                employee.getId(), employee.getName(), employee.getDepartment(), kafkaProperties.consumerGroupId());
+    public void consume(EmployeeEvent event) {
+        if (event.type() == null || event.employeeId() == null) {
+            throw new IllegalArgumentException("Employee event must contain a type and employee ID");
+        }
+        if (event.type() == EmployeeEventType.CREATED) {
+            if (event.name() == null || event.department() == null) {
+                throw new IllegalArgumentException("Employee creation event must contain name and department");
+            }
+            employeeRepository.save(EmployeeEntity.from(event));
+            LOGGER.info("Persisted employee event: employeeId={}, consumerGroup={}",
+                    event.employeeId(), kafkaProperties.consumerGroupId());
+        }
+        else if (event.type() == EmployeeEventType.DELETED) {
+            employeeRepository.deleteById(event.employeeId());
+            LOGGER.info("Deleted employee event: employeeId={}, consumerGroup={}",
+                    event.employeeId(), kafkaProperties.consumerGroupId());
+        }
     }
 }

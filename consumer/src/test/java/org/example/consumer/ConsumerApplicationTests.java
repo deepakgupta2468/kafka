@@ -2,6 +2,8 @@ package org.example.consumer;
 
 import java.util.concurrent.TimeUnit;
 import org.example.consumer.model.Employee;
+import org.example.consumer.model.EmployeeEvent;
+import org.example.consumer.model.EmployeeEventType;
 import org.example.consumer.repository.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +30,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConsumerApplicationTests {
 
     @Autowired
-    private KafkaTemplate<String, Employee> kafkaTemplate;
+    private KafkaTemplate<String, EmployeeEvent> kafkaTemplate;
 
     @Autowired
     private EmployeeRepository employeeRepository;
 
     @Test
     void persistsConsumedEmployee() throws Exception {
-        kafkaTemplate.send("employees.v1", "42", new Employee(42L, "Deepak", "Engineering"))
+        kafkaTemplate.send("employees.v1", "42",
+                        new EmployeeEvent(EmployeeEventType.CREATED, 42L, "Deepak", "Engineering"))
                 .get(10, TimeUnit.SECONDS);
 
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
@@ -44,5 +47,21 @@ class ConsumerApplicationTests {
         }
 
         assertThat(employeeRepository.existsById(42L)).isTrue();
+    }
+
+    @Test
+    void deletesEmployeeForConsumedDeletionEvent() throws Exception {
+        employeeRepository.save(org.example.consumer.model.EmployeeEntity.from(
+                new Employee(99L, "Deepak", "Engineering")
+        ));
+        kafkaTemplate.send("employees.v1", "99", new EmployeeEvent(EmployeeEventType.DELETED, 99L, null, null))
+                .get(10, TimeUnit.SECONDS);
+
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (System.nanoTime() < deadline && employeeRepository.existsById(99L)) {
+            Thread.sleep(100);
+        }
+
+        assertThat(employeeRepository.existsById(99L)).isFalse();
     }
 }

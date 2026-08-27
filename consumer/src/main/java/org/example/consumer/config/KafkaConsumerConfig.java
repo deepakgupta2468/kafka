@@ -6,7 +6,7 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.example.consumer.model.Employee;
+import org.example.consumer.model.EmployeeEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -33,7 +33,7 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, Employee> consumerFactory() {
+    public ConsumerFactory<String, EmployeeEvent> consumerFactory() {
         Map<String, Object> props = Map.of(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.bootstrapServers(),
                 ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.consumerGroupId(),
@@ -43,17 +43,17 @@ public class KafkaConsumerConfig {
                 ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class,
                 ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class,
                 JacksonJsonDeserializer.TRUSTED_PACKAGES, "org.example.consumer.model",
-                JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, Employee.class.getName(),
+                JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, EmployeeEvent.class.getName(),
                 JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS, false
         );
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Employee> kafkaListenerContainerFactory(
-            KafkaTemplate<String, Employee> kafkaTemplate
+    public ConcurrentKafkaListenerContainerFactory<String, EmployeeEvent> kafkaListenerContainerFactory(
+            KafkaTemplate<String, EmployeeEvent> kafkaTemplate
     ) {
-        ConcurrentKafkaListenerContainerFactory<String, Employee> factory =
+        ConcurrentKafkaListenerContainerFactory<String, EmployeeEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.setCommonErrorHandler(kafkaErrorHandler(kafkaTemplate));
@@ -62,7 +62,7 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, Employee> kafkaTemplate) {
+    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, EmployeeEvent> kafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
                 (record, exception) -> new TopicPartition(kafkaProperties.employeeDltTopic(), record.partition())
@@ -96,4 +96,5 @@ public class KafkaConsumerConfig {
                 .replicas(kafkaProperties.topicReplicationFactor())
                 .build();
     }
+
 }
