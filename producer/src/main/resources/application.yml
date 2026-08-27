@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: employee-producer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+app:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    employee-topic: ${KAFKA_EMPLOYEE_TOPIC:employees.v1}

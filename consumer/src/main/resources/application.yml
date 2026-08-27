@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: employee-consumer
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/kafka_exp1}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:admin}
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+app:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    employee-topic: ${KAFKA_EMPLOYEE_TOPIC:employees.v1}
+    consumer-group-id: ${KAFKA_CONSUMER_GROUP_ID:employee-service}
+    topic-partitions: ${KAFKA_TOPIC_PARTITIONS:5}
+    topic-replication-factor: ${KAFKA_TOPIC_REPLICATION_FACTOR:1}
+    concurrency: ${KAFKA_CONCURRENCY:5}
