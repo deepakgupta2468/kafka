@@ -20,8 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
         "app.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
         "app.kafka.employee-topic=employees.v1",
         "app.kafka.consumer-group-id=employee-service-test",
-        "app.kafka.topic-partitions=1",
-        "app.kafka.topic-replication-factor=1",
         "app.kafka.concurrency=1",
         "spring.datasource.url=jdbc:h2:mem:employee-consumer;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
         "spring.datasource.driver-class-name=org.h2.Driver",

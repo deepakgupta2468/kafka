@@ -1,8 +1,6 @@
 package org.example.consumer.config;
 
 import java.util.Map;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -11,10 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
@@ -65,36 +61,13 @@ public class KafkaConsumerConfig {
     public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, EmployeeEvent> kafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
                 kafkaTemplate,
-                (record, exception) -> new TopicPartition(kafkaProperties.employeeDltTopic(), record.partition())
+                (record, exception) -> new TopicPartition(kafkaProperties.employeeTopic() + ".dlt", record.partition())
         );
         ExponentialBackOffWithMaxRetries backOff = new ExponentialBackOffWithMaxRetries(3);
         backOff.setInitialInterval(1_000L);
         backOff.setMultiplier(2.0);
         backOff.setMaxInterval(10_000L);
         return new DefaultErrorHandler(recoverer, backOff);
-    }
-
-    @Bean
-    public KafkaAdmin kafkaAdmin() {
-        return new KafkaAdmin(Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.bootstrapServers()
-        ));
-    }
-
-    @Bean
-    public NewTopic employeeTopic() {
-        return TopicBuilder.name(kafkaProperties.employeeTopic())
-                .partitions(kafkaProperties.topicPartitions())
-                .replicas(kafkaProperties.topicReplicationFactor())
-                .build();
-    }
-
-    @Bean
-    public NewTopic employeeDltTopic() {
-        return TopicBuilder.name(kafkaProperties.employeeDltTopic())
-                .partitions(kafkaProperties.topicPartitions())
-                .replicas(kafkaProperties.topicReplicationFactor())
-                .build();
     }
 
 }

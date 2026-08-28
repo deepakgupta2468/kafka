@@ -21,6 +21,4 @@ app:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     employee-topic: ${KAFKA_EMPLOYEE_TOPIC:employees.v1}
     consumer-group-id: ${KAFKA_CONSUMER_GROUP_ID:employee-service}
-    topic-partitions: ${KAFKA_TOPIC_PARTITIONS:5}
-    topic-replication-factor: ${KAFKA_TOPIC_REPLICATION_FACTOR:1}
     concurrency: ${KAFKA_CONCURRENCY:5}
