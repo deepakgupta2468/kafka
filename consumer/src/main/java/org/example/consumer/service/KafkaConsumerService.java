@@ -3,16 +3,16 @@ package org.example.consumer.service;
 import tools.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.UUID;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.example.consumer.config.KafkaConsumerProperties;
 import org.example.consumer.model.DeadLetterEventEntity;
 import org.example.consumer.model.EmployeeEntity;
+import org.example.consumer.model.ProcessedEventEntity;
 import org.example.consumer.repository.DeadLetterEventRepository;
 import org.example.consumer.repository.EmployeeRepository;
-import org.example.consumer.repository.ProcessedEventClaimRepository;
+import org.example.consumer.repository.ProcessedEventRepository;
 import org.example.events.EmployeeEvent;
 import org.example.events.EmployeeEventType;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class KafkaConsumerService {
 
     private final KafkaConsumerProperties kafkaProperties;
     private final EmployeeRepository employeeRepository;
-    private final ProcessedEventClaimRepository processedEventClaimRepository;
+    private final ProcessedEventRepository processedEventRepository;
     private final DeadLetterEventRepository deadLetterEventRepository;
     private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper;
@@ -40,14 +40,14 @@ public class KafkaConsumerService {
     public KafkaConsumerService(
             KafkaConsumerProperties kafkaProperties,
             EmployeeRepository employeeRepository,
-            ProcessedEventClaimRepository processedEventClaimRepository,
+            ProcessedEventRepository processedEventRepository,
             DeadLetterEventRepository deadLetterEventRepository,
             MeterRegistry meterRegistry,
             ObjectMapper objectMapper
     ) {
         this.kafkaProperties = kafkaProperties;
         this.employeeRepository = employeeRepository;
-        this.processedEventClaimRepository = processedEventClaimRepository;
+        this.processedEventRepository = processedEventRepository;
         this.deadLetterEventRepository = deadLetterEventRepository;
         this.meterRegistry = meterRegistry;
         this.objectMapper = objectMapper;
@@ -60,13 +60,16 @@ public class KafkaConsumerService {
     )
     @Transactional
     public void consume(EmployeeEvent event) {
+        LOGGER.info("Consuming employee event: eventId={}, type={}, employeeId={}",
+                event.eventId(), event.type(), event.employeeId());
         validateEvent(event);
-        if (claimEvent(event.eventId())) {
+        if (processedEventRepository.existsById(event.eventId())) {
             meterRegistry.counter("employee.consumer.events", "outcome", "duplicate").increment();
             LOGGER.info("Ignoring duplicate employee event: eventId={}", event.eventId());
             return;
         }
         processEvent(event);
+        processedEventRepository.save(new ProcessedEventEntity(event.eventId(), Instant.now()));
     }
 
     @KafkaListener(
@@ -110,10 +113,6 @@ public class KafkaConsumerService {
         if (event.schemaVersion() != EmployeeEvent.CURRENT_SCHEMA_VERSION) {
             throw new IllegalArgumentException("Unsupported employee event schema version: " + event.schemaVersion());
         }
-    }
-
-    private boolean claimEvent(UUID eventId) {
-        return !processedEventClaimRepository.tryClaim(eventId, Instant.now());
     }
 
     private void processEvent(EmployeeEvent event) {

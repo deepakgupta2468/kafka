@@ -2,11 +2,11 @@ package org.example.producer.service;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.example.events.EmployeeEvent;
+import org.example.events.EmployeeEventType;
 import org.example.producer.config.KafkaProducerProperties;
 import org.example.producer.model.Employee;
 import org.example.producer.outbox.OutboxService;
-import org.example.events.EmployeeEvent;
-import org.example.events.EmployeeEventType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,8 +24,12 @@ public class KafkaProducerService {
     }
 
     public UUID sendEmployee(Employee employee) {
+        return sendEmployee(employee, UUID.randomUUID());
+    }
+
+    public UUID sendEmployee(Employee employee, UUID eventId) {
         EmployeeEvent event = new EmployeeEvent(
-                UUID.randomUUID(),
+                eventId,
                 EmployeeEvent.CURRENT_SCHEMA_VERSION,
                 EmployeeEventType.CREATED,
                 employee.getId(),
@@ -38,8 +42,12 @@ public class KafkaProducerService {
     }
 
     public UUID deleteEmployee(Long employeeId) {
+        return deleteEmployee(employeeId, UUID.randomUUID());
+    }
+
+    public UUID deleteEmployee(Long employeeId, UUID eventId) {
         EmployeeEvent event = new EmployeeEvent(
-                UUID.randomUUID(),
+                eventId,
                 EmployeeEvent.CURRENT_SCHEMA_VERSION,
                 EmployeeEventType.DELETED,
                 employeeId,

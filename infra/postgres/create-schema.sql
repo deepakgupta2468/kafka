@@ -1,4 +1,6 @@
--- Producer database schema (managed by Flyway in the producer service)
+-- Producer database schema (managed by Flyway in the producer service).
+-- DBeaver: connect as kafka-exp1-producer → database kafka_exp1_producer.
+-- Tables here: outbox_events only. Employees are NOT stored in this database.
 \c kafka_exp1_producer
 
 CREATE TABLE IF NOT EXISTS outbox_events (
@@ -15,7 +17,9 @@ CREATE TABLE IF NOT EXISTS outbox_events (
 
 CREATE INDEX IF NOT EXISTS idx_outbox_pending ON outbox_events (created_at) WHERE status = 'PENDING';
 
--- Consumer database schema (managed by Flyway in the consumer service)
+-- Consumer database schema (managed by Flyway in the consumer service).
+-- DBeaver: connect as kafka-exp1-consumer → database kafka_exp1_consumer.
+-- After POST /employees, query employees here (not kafka_exp1 or kafka_exp1_producer).
 \c kafka_exp1_consumer
 
 CREATE TABLE IF NOT EXISTS employees (

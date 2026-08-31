@@ -10,6 +10,37 @@ Production-oriented employee event pipeline: the producer accepts create/delete 
 
 Each service owns a separate PostgreSQL database. Schema changes are managed with Flyway.
 
+**Do not query the legacy `kafka_exp1` database for new events.** After the split, the producer writes to `kafka_exp1_producer` and the consumer writes employees to `kafka_exp1_consumer`.
+
+## Databases
+
+Host: `localhost`, port: `5433`, user: `postgres`.
+
+| What you are checking | Database | Tables |
+|-----------------------|----------|--------|
+| Outbox publish status | `kafka_exp1_producer` | `outbox_events` |
+| Persisted employees | `kafka_exp1_consumer` | `employees` |
+| Consumer idempotency | `kafka_exp1_consumer` | `processed_events` |
+| Dead-letter records | `kafka_exp1_consumer` | `dead_letter_events` |
+| Old shared schema | `kafka_exp1` | leftover; ignore for new traffic |
+
+Suggested DBeaver connections (create two, named exactly like this):
+
+- **kafka-exp1-producer** → JDBC URL `jdbc:postgresql://localhost:5433/kafka_exp1_producer`
+- **kafka-exp1-consumer** → JDBC URL `jdbc:postgresql://localhost:5433/kafka_exp1_consumer`
+
+After `POST /employees`, confirm in **kafka-exp1-consumer** → `employees`, not in the producer DB or `kafka_exp1`.
+
+```sql
+-- consumer
+SELECT * FROM employees ORDER BY id DESC LIMIT 10;
+SELECT * FROM processed_events ORDER BY processed_at DESC LIMIT 10;
+
+-- producer
+SELECT id, aggregate_key, status, published_at FROM outbox_events ORDER BY created_at DESC LIMIT 10;
+```
+
+
 ## Quick start (Docker)
 
 ```bash
@@ -50,8 +81,10 @@ psql -h localhost -p 5433 -U postgres -f infra/postgres/init-databases.sql
 ```
 
 Default databases:
-- Producer: `kafka_exp1_producer`
-- Consumer: `kafka_exp1_consumer`
+- Producer: `kafka_exp1_producer` (outbox only)
+- Consumer: `kafka_exp1_consumer` (employees, processed events, DLT)
+- Legacy `kafka_exp1` is unused by the current apps
+
 
 ## Production deployment
 

@@ -101,7 +101,7 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, EmployeeEvent> dltProducerFactory() {
+    public ProducerFactory<String, EmployeeEvent> producerFactory() {
         Map<String, Object> props = new HashMap<>(springKafkaProperties.buildProducerProperties());
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.bootstrapServers());
         props.put(ProducerConfig.ACKS_CONFIG, "all");
@@ -113,6 +113,6 @@ public class KafkaConsumerConfig {
 
     @Bean
     public KafkaTemplate<String, EmployeeEvent> kafkaTemplate() {
-        return new KafkaTemplate<>(dltProducerFactory());
+        return new KafkaTemplate<>(producerFactory());
     }
 }
