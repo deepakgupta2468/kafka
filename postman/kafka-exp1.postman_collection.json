@@ -10,6 +10,10 @@
       "value": "http://localhost:8080"
     },
     {
+      "key": "apiKey",
+      "value": "dev-api-key"
+    },
+    {
       "key": "employeeId",
       "value": "101"
     }
@@ -20,7 +24,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": "{{producerBaseUrl}}/actuator/health"
+        "url": "http://localhost:9090/actuator/health"
       }
     },
     {
@@ -31,6 +35,10 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}"
           }
         ],
         "body": {
@@ -50,7 +58,12 @@
       "name": "Delete employee event",
       "request": {
         "method": "DELETE",
-        "header": [],
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}"
+          }
+        ],
         "url": "{{producerBaseUrl}}/employees/{{employeeId}}"
       },
       "response": []

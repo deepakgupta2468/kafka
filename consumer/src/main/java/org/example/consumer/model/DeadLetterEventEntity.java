@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
@@ -25,11 +24,20 @@ public class DeadLetterEventEntity {
     @Column(nullable = false)
     private Instant receivedAt;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String failureReason;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String rawPayload;
+
+    private String sourceTopic;
+
+    private Integer sourcePartition;
+
+    private Long sourceOffset;
+
+    @Column(columnDefinition = "TEXT")
+    private String exceptionMessage;
 
     protected DeadLetterEventEntity() {
     }
@@ -39,12 +47,20 @@ public class DeadLetterEventEntity {
             Long employeeId,
             Instant receivedAt,
             String failureReason,
-            String rawPayload
+            String rawPayload,
+            String sourceTopic,
+            Integer sourcePartition,
+            Long sourceOffset,
+            String exceptionMessage
     ) {
         this.eventId = eventId;
         this.employeeId = employeeId;
         this.receivedAt = receivedAt;
         this.failureReason = failureReason;
         this.rawPayload = rawPayload;
+        this.sourceTopic = sourceTopic;
+        this.sourcePartition = sourcePartition;
+        this.sourceOffset = sourceOffset;
+        this.exceptionMessage = exceptionMessage;
     }
 }

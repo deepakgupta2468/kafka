@@ -2,19 +2,38 @@ spring:
   application:
     name: employee-producer
   datasource:
-    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/kafka_exp1}
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/kafka_exp1_producer}
     username: ${POSTGRES_USERNAME:postgres}
     password: ${POSTGRES_PASSWORD:admin}
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
+      ddl-auto: validate
     open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
 
 management:
+  server:
+    port: ${MANAGEMENT_PORT:9090}
   endpoints:
     web:
       exposure:
         include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
 
 app:
   kafka:
@@ -22,3 +41,8 @@ app:
     employee-topic: ${KAFKA_EMPLOYEE_TOPIC:employees.v1}
   outbox:
     publish-interval-ms: ${OUTBOX_PUBLISH_INTERVAL_MS:1000}
+    batch-size: ${OUTBOX_BATCH_SIZE:100}
+    max-retries: ${OUTBOX_MAX_RETRIES:5}
+  security:
+    enabled: ${API_SECURITY_ENABLED:false}
+    api-key: ${API_KEY:dev-api-key}

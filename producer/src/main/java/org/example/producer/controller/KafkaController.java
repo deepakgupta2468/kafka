@@ -21,14 +21,14 @@ public class KafkaController {
     }
 
     @PostMapping("/employees")
-    public ResponseEntity<Void> sendEmployee(@Valid @RequestBody Employee employee) {
-        producerService.sendEmployee(employee);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    public ResponseEntity<EmployeeEventResponse> sendEmployee(@Valid @RequestBody Employee employee) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(new EmployeeEventResponse(producerService.sendEmployee(employee)));
     }
 
     @DeleteMapping("/employees/{employeeId}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long employeeId) {
-        producerService.deleteEmployee(employeeId);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    public ResponseEntity<EmployeeEventResponse> deleteEmployee(@PathVariable Long employeeId) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(new EmployeeEventResponse(producerService.deleteEmployee(employeeId)));
     }
 }

@@ -1,5 +1,6 @@
 package org.example.producer.controller;
 
+import java.util.UUID;
 import org.example.producer.service.KafkaProducerService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -9,8 +10,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class KafkaControllerTests {
@@ -20,10 +23,18 @@ class KafkaControllerTests {
 
     @Test
     void acceptsEmployeeCreationRequest() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        when(producerService.sendEmployee(argThat(employee ->
+                employee.getId().equals(101L)
+                        && employee.getName().equals("Deepak")
+                        && employee.getDepartment().equals("Engineering")
+        ))).thenReturn(eventId);
+
         mockMvc.perform(post("/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\":101,\"name\":\"Deepak\",\"department\":\"Engineering\"}"))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.eventId").value(eventId.toString()));
 
         verify(producerService).sendEmployee(argThat(employee ->
                 employee.getId().equals(101L)
@@ -34,8 +45,12 @@ class KafkaControllerTests {
 
     @Test
     void acceptsEmployeeDeletionRequest() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        when(producerService.deleteEmployee(101L)).thenReturn(eventId);
+
         mockMvc.perform(delete("/employees/101"))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.eventId").value(eventId.toString()));
 
         verify(producerService).deleteEmployee(101L);
     }

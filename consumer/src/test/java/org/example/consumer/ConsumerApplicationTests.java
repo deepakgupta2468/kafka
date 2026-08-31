@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "app.kafka.consumer-group-id=employee-service-test",
         "app.kafka.dlt-consumer-group-id=employee-dlt-service-test",
         "app.kafka.concurrency=1",
+        "spring.flyway.enabled=false",
         "spring.datasource.url=jdbc:h2:mem:employee-consumer;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
         "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.jpa.hibernate.ddl-auto=create-drop"

@@ -2,15 +2,17 @@ spring:
   config:
     activate:
       on-profile: prod
+    import: optional:classpath:application-kafka-prod.yml
   datasource:
     url: ${POSTGRES_URL}
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: validate
 
 management:
   endpoint:
     health:
       show-details: never
+
+app:
+  security:
+    enabled: true

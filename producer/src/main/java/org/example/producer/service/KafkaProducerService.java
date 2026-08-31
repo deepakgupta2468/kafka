@@ -23,7 +23,7 @@ public class KafkaProducerService {
         this.kafkaProperties = kafkaProperties;
     }
 
-    public void sendEmployee(Employee employee) {
+    public UUID sendEmployee(Employee employee) {
         EmployeeEvent event = new EmployeeEvent(
                 UUID.randomUUID(),
                 EmployeeEvent.CURRENT_SCHEMA_VERSION,
@@ -34,9 +34,10 @@ public class KafkaProducerService {
                 Instant.now()
         );
         outboxService.store(event, kafkaProperties.employeeTopic());
+        return event.eventId();
     }
 
-    public void deleteEmployee(Long employeeId) {
+    public UUID deleteEmployee(Long employeeId) {
         EmployeeEvent event = new EmployeeEvent(
                 UUID.randomUUID(),
                 EmployeeEvent.CURRENT_SCHEMA_VERSION,
@@ -47,5 +48,6 @@ public class KafkaProducerService {
                 Instant.now()
         );
         outboxService.store(event, kafkaProperties.employeeTopic());
+        return event.eventId();
     }
 }
