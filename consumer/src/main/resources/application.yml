@@ -14,11 +14,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
 
 app:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     employee-topic: ${KAFKA_EMPLOYEE_TOPIC:employees.v1}
     consumer-group-id: ${KAFKA_CONSUMER_GROUP_ID:employee-service}
+    dlt-consumer-group-id: ${KAFKA_DLT_CONSUMER_GROUP_ID:employee-dlt-service}
     concurrency: ${KAFKA_CONCURRENCY:5}

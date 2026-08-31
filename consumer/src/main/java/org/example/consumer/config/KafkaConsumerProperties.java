@@ -11,6 +11,7 @@ public record KafkaConsumerProperties(
         @NotBlank String bootstrapServers,
         @NotBlank String employeeTopic,
         @NotBlank String consumerGroupId,
+        @NotBlank String dltConsumerGroupId,
         @Min(1) int concurrency
 ) {
 }

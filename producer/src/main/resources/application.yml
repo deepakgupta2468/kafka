@@ -1,14 +1,24 @@
 spring:
   application:
     name: employee-producer
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5433/kafka_exp1}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:admin}
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    open-in-view: false
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
 
 app:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     employee-topic: ${KAFKA_EMPLOYEE_TOPIC:employees.v1}
+  outbox:
+    publish-interval-ms: ${OUTBOX_PUBLISH_INTERVAL_MS:1000}
