@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.example.events.EmployeeEvent;
 
 @Entity
 @Table(name = "employees")
@@ -29,5 +30,9 @@ public class EmployeeEntity {
 
     public static EmployeeEntity from(Employee employee) {
         return new EmployeeEntity(employee.getId(), employee.getName(), employee.getDepartment());
+    }
+
+    public static EmployeeEntity from(EmployeeEvent event) {
+        return new EmployeeEntity(event.employeeId(), event.name(), event.department());
     }
 }

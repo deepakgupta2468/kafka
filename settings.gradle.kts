@@ -1,2 +1,2 @@
 rootProject.name = "kafka-exp1"
-include("producer", "consumer")
+include("common-events", "producer", "consumer")

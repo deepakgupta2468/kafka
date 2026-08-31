@@ -11,11 +11,7 @@ public record KafkaConsumerProperties(
         @NotBlank String bootstrapServers,
         @NotBlank String employeeTopic,
         @NotBlank String consumerGroupId,
-        @Min(1) int topicPartitions,
-        @Min(1) short topicReplicationFactor,
+        @NotBlank String dltConsumerGroupId,
         @Min(1) int concurrency
 ) {
-    public String employeeDltTopic() {
-        return employeeTopic + ".dlt";
-    }
 }
